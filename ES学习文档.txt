@@ -1,0 +1,47 @@
+概念:
+	field datatype: text, keyword, date, long, double, boolean, ip, String, object等.(String 在ES5.0以后被text和keyword取代)
+	text: 默认是analyzed, 不可排序,聚合
+	keyword: 默认是unanalyzed, 用来排序,聚合
+	date: 可被自定义格式, 默认:strict_date_optional_time||epoch_millis 
+	long: long, integer, short, byte, double, float, half_float, scaled_float(自动缩放)均属于number型.
+	ip: 支持IP/掩码的方式查询(192.168.0.1/30可以查出192.168.0.0-192.168.0.3之间的数据)
+
+	查看分词结果: http://localhost:9200/_analyze?pretty&analyzer=standard&text=江苏省
+	对结果输出json格式化: 参数后加pretty(http://127.0.0.1:9200/syslog_201712/?pretty)
+
+sql插件:
+	无图形化页面 http://127.0.0.1:9200/_sql/?pretty&sql=select * from index
+	把查询sql转化成json http://127.0.0.1:9200/_sql/_explain?sql=select * from index
+	注意: 1. 使用<>代替!=
+	      2. field like '%abc%'的实质是使用wildcard正则查询, 而field = matchQuery('abc')是使用match查询
+
+XGET的方式都可以用浏览器访问(支持正则)
+查看索引信息:
+	curl -XGET http://127.0.0.1:9200/syslog_201712/?pretty
+查看索引状态:
+	curl -XGET http://127.0.0.1:9200/_cat/indices?v
+查看elastic索引的mapping:
+	curl -XGET "http://127.0.0.1:9200/elastic/_mapping?pretty"
+新建索引elastic:
+	curl -XPUT http://127.0.0.1:9200/elastic //使用默认分片(5个)和默认副本(1个)
+	curl -XPUT http://127.0.0.1:9200/elastic -d '{"settings": {"number_of_shards": 1, "number_of_replicas": 0}}'(1个分片0个副本)
+删除索引elastic:
+	curl -XDELETE http://127.0.0.1:9200/elastic
+修改mapping: 
+	linux环境: curl -XPUT http://127.0.0.1:9200/blog/_mapping/article?pretty -d '{"properties":{ "id":{"type":"long"}, "name":{"type":"string"}, "published":{"type":"date"} }}'
+	windows环境:　curl -XPUT http://127.0.0.1:9200/blog/_mapping/article?pretty -d "{"""properties""":{"""id""":{"""type""":"""long"""},"""name""":{"""type""":"""string"""}, """published""":{"""type""":"""date"""}}}"
+	(设置long型的id字段, string型的name字段, date型的published字段)
+	具体: https://www.cnblogs.com/sheeva/p/4837881.html
+新增:
+	使用bulk命令时，REST API以_bulk结尾,批量操作写在json文件中，官网给出的语法格式：  
+	action_and_meta_data\n  
+	optional_source\n  
+	action_and_meta_data\n  
+	optional_source\n  
+	....  
+	action_and_meta_data\n  
+	optional_source\n  
+	命令操作类型占一行 数据另起一行  
+
+查询:
+	

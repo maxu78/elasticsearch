@@ -1,0 +1,4 @@
+elasticsearch:
+  url: 127.0.0.1
+  port: 10200
+  scheme: http
